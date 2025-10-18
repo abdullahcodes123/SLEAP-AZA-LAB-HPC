@@ -1,0 +1,20 @@
+#setup this sleap version https://legacy.sleap.ai/installation.html
+
+conda activate sleap
+
+#then assign GPU instead of CPU
+
+module load UCX/1.9.0-GCCcore-10.2.0 OpenMPI/4.0.5-GCC-10.2.0
+module load TensorFlow/2.7.1-foss-2020b-CUDA-11.3.1
+
+#then test it === you should see GPU instead of []
+python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+
+#solve your TF environment this is optional module purge && unset PYTHONPATH && export PYTHONNOUSERSITE=1 && source ~/.bashrc && conda activate sleap && pip install -U pip setuptools wheel && pip install "tensorflow==2.7.1" "h5py==3.1.0"
+
+#then start your training 
+cd /home/at2438/SLEAP_FILES/PROGRESS/training_job_files && sleap-train --gpu auto centroid.json labels.v001.pkg.slp
+cd /home/at2438/SLEAP_FILES/PROGRESS/training_job_files && sleap-train --gpu auto centered_instance.json labels.v001.pkg.slp
+
+#estimate 20 frame inference
+CENTROID_DIR=$(ls -d /home/at2438/SLEAP_FILES/PROGRESS/training_job_files/models/*centroid* 2>/dev/null | sort | tail -1) && INST_DIR=$(ls -d /home/at2438/SLEAP_FILES/PROGRESS/training_job_files/models/*centered_instance* 2>/dev/null | sort | tail -1) && sleap-track --gpu auto -m "$CENTROID_DIR" -m "$INST_DIR" --frames 1-20 -o /home/at2438/SLEAP_FILES/PROGRESS/cage_b.predictions.slp /home/at2438/SLEAP_FILES/VIDEOS/cage_b.mp4
